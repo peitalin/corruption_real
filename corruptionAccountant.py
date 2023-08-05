@@ -78,7 +78,6 @@ class CorruptionAccountant:
             return dark_prism_drop_rates[6]
 
 
-
     def emitCorruption(self, hour):
         # 1800 a hour = 302_400 a week per building
         for k in self.y_structures:

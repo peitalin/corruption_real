@@ -81,6 +81,7 @@ harvester_age = {
 
 
 default_initial_balances = {
+    # corruption
     'y_dark_prisms': 0,
     'y_dark_prisms_cumulative': 0,
     'y_prisms': 0,
