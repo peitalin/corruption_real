@@ -46,9 +46,9 @@ def simulation_fn(i):
     ax2.clear()
     ax3.clear()
 
+    corrAccountant.addAccountingEntriesForHour(hour)
     corrAccountant.emitCorruption(hour)
     corrAccountant.emitForgeableCorruption(hour)
-    corrAccountant.addAccountingEntriesForHour(hour)
     corrAccountant.calcHarvestersDmg(hour)
 
     for k in corrAccountant.y_structures:
@@ -108,7 +108,6 @@ def simulation_fn(i):
     )
     ax3.plot(
         hours,
-        # corrAccountant.y_crafted_corruption.values(),
         corrAccountant.y_total_circulating_corruption.values(),
         label="Circulating Forged Corruption",
         color='purple',

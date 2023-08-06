@@ -86,21 +86,21 @@ default_initial_balances = {
     'y_dark_prisms_cumulative': 0,
     'y_prisms': 0,
     'y_prisms_cumulative': 0,
-    'y_forgeable_corruption': 100_000,
-    'y_crafted_corruption': 0,
+    'y_forgeable_corruption': 800_000,
+    'y_total_circulating_corruption': 400_000,
 }
 
 initial_corruption_balances = {
-    "questing": 80_000,
-    "crafting": 80_000,
-    "summoning": 80_000,
-    'h1': 80_000,
-    'h2': 80_000,
-    'h3': 80_000,
-    'h4': 80_000,
-    'h5': 80_000,
-    'h6': 80_000,
-    'h7': 80_000,
+    "questing": 90_000,
+    "crafting": 90_000,
+    "summoning": 90_000,
+    'h1': 90_000,
+    'h2': 90_000,
+    'h3': 90_000,
+    'h4': 90_000,
+    'h5': 90_000,
+    'h6': 90_000,
+    'h7': 90_000,
 }
 
 harvester_list = [
@@ -112,3 +112,33 @@ harvester_list = [
     'h6',
     'h7'
 ]
+
+def getCorruptionLevel(c):
+    if c > 600_000:
+        return 6
+    elif c > 500_000:
+        return 5
+    elif c > 400_000:
+        return 4
+    elif c > 300_000:
+        return 3
+    elif c > 200_000:
+        return 2
+    elif c > 100_000:
+        return 1
+    else:
+        return 0
+
+
+corruption_diversion_points = {
+    'gen_1_1': 600,
+    'gen_rare': 400,
+    'gen_uncommon': 200,
+    'gen_special': 150,
+    'gen_common': 100,
+    'aux_rare': 40,
+    'beacon_pets': 40,
+    'kote_squires': 40,
+    'aux_uncommon': 30,
+    'aux_common': 20,
+}

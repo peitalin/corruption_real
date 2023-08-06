@@ -2,7 +2,7 @@
 import numpy as np
 from parameters import corruption_rate, amount_corruption_removed, dark_prism_drop_rates
 from parameters import percent_corr_forged_by_legion, harvester_age, default_initial_balances
-from parameters import initial_corruption_balances, harvester_list
+from parameters import initial_corruption_balances, harvester_list, getCorruptionLevel
 
 
 class CorruptionAccountant:
@@ -48,25 +48,22 @@ class CorruptionAccountant:
         }
 
         self.y_prisms = {
-            0: 0,
+            0: default_initial_balances["y_prisms"]
         }
         self.y_dark_prisms = {
-            0: 0,
+            0: default_initial_balances["y_dark_prisms"]
         }
         self.y_prisms_cumulative = {
-            0: 0,
+            0: default_initial_balances["y_prisms_cumulative"]
         }
         self.y_dark_prisms_cumulative = {
-            0: 0,
+            0: default_initial_balances["y_dark_prisms_cumulative"]
         }
         self.y_forgeable_corruption = {
-            0: 0,
-        }
-        self.y_crafted_corruption = {
-            0: 0,
+            0: default_initial_balances["y_forgeable_corruption"]
         }
         self.y_total_circulating_corruption = {
-            0: 0,
+            0: default_initial_balances["y_total_circulating_corruption"]
         }
 
 
@@ -84,7 +81,7 @@ class CorruptionAccountant:
 
             rate = self.corruption_rate[k]
 
-            if len(self.y_corruption[k]) > 0:
+            if hour > 0:
                 prev_value = self.y_corruption[k][-1]
                 if prev_value <= 1_000_000:
                     self.y_corruption[k].append(prev_value + rate)
@@ -93,11 +90,9 @@ class CorruptionAccountant:
 
 
     def emitForgeableCorruption(self, hour, rate=8000):
-        if hour == 0:
-            prev_value = 0
-        else:
+        if hour > 0:
             prev_value = self.y_forgeable_corruption[hour-1]
-        self.y_forgeable_corruption[hour] = prev_value + rate
+            self.y_forgeable_corruption[hour] = prev_value + rate
 
 
     def _removeCorruption(self, k):
@@ -135,32 +130,26 @@ class CorruptionAccountant:
             print("hour entry not in y_forgeable_corruption")
             return
         else:
-            if hour not in self.y_crafted_corruption.keys():
-                self.y_crafted_corruption[hour] = 0
-            else:
+            if hour in self.y_total_circulating_corruption.keys():
                 totalAmountForgeable = self.y_forgeable_corruption[hour]
                 amountForged = percentForgeable * totalAmountForgeable
 
                 self.y_forgeable_corruption[hour] -= amountForged
-                self.y_crafted_corruption[hour] += amountForged
                 self.y_total_circulating_corruption[hour] += amountForged
 
 
     def addAccountingEntriesForHour(self, hour):
-        # check entry exists, add if need be
+        """check entry exists, add if need be"""
 
         # time-series
         if hour not in self.y_dark_prisms.keys():
-            self.y_dark_prisms[hour] = default_initial_balances["y_dark_prisms"]
+            self.y_dark_prisms[hour] = 0
 
         if hour not in self.y_prisms.keys():
-            self.y_prisms[hour] = default_initial_balances["y_prisms"]
+            self.y_prisms[hour] = 0
 
         if hour not in self.y_forgeable_corruption.keys():
-            self.y_forgeable_corruption[hour] = default_initial_balances["y_forgeable_corruption"]
-
-        if hour not in self.y_crafted_corruption.keys():
-            self.y_crafted_corruption[hour] = default_initial_balances["y_crafted_corruption"]
+            self.y_forgeable_corruption[hour] = 0
 
         # cumulative time-series
         if hour not in self.y_total_circulating_corruption.keys():
@@ -321,22 +310,6 @@ def getDmgAmount(cLevel, harvester):
     else:
         n = 1 * h
     return n
-
-def getCorruptionLevel(c):
-    if c > 600_000:
-        return 6
-    elif c > 500_000:
-        return 5
-    elif c > 400_000:
-        return 4
-    elif c > 300_000:
-        return 3
-    elif c > 200_000:
-        return 2
-    elif c > 100_000:
-        return 1
-    else:
-        return 0
 
 
 def getNumTimesTryRemoveCorruption(c, k='harvester'):

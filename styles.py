@@ -3,7 +3,6 @@ line_styles = {
     "questing": '--',
     "crafting": '--',
     "summoning": '--',
-    "forbidden_crafts": '--',
     'h1': ':',
     'h2': ':',
     'h3': ':',
@@ -11,8 +10,6 @@ line_styles = {
     'h5': ':',
     'h6': ':',
     'h7': ':',
-    'h8': ':',
-    'h9': ':',
 }
 
 colors = [
@@ -27,6 +24,15 @@ line_colors = {
     "crafting": colors[2],
     "summoning": 'mediumseagreen',
     "forbidden_crafts": 'gold',
+    # crypts
+    'crypts_h1': 'orange',
+    'crypts_h2': 'gold',
+    'crypts_h3': 'gold',
+    'crypts_h4': 'gold',
+    'crypts_h5': 'gold',
+    'crypts_h6': 'gold',
+    'crypts_h7': 'gold',
+
     'h1': 'black',
     'h2': 'slategrey',
     'h3': 'slategrey',
@@ -34,8 +40,6 @@ line_colors = {
     'h5': 'slategrey',
     'h6': 'slategrey',
     'h7': 'slategrey',
-    'h8': 'slategrey',
-    'h9': 'slategrey',
 }
 
 brown = '#AC8F59'
@@ -47,6 +51,8 @@ lightblue = '#182329'
 
 
 harvester_linestyles = {
+    "questing": '-',
+    "crafting": '-',
     "h1": '-',
     "h2": '--',
     "h3": '--',
