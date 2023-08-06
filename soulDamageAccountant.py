@@ -5,12 +5,12 @@ from parameters import corruption_diversion_points
 import numpy as np
 
 
-HOURS_TO_REACH_CRYPTS_ENDTILES = 6
+HOURS_TO_REACH_CRYPTS_ENDTILES = 12
 
 
 def drawTileArrivals():
-    # simulate characters arriving on harvester tiles/destinations every period (few hours)
-    bounds = [50, 200]
+    # simulate characters arriving on harvester tiles/destinations every period (1 hours)
+    bounds = [20, 40]
     return {
         'h1': np.random.randint(bounds[0], bounds[1]),
         'h2': np.random.randint(bounds[0], bounds[1]),
@@ -94,7 +94,7 @@ class SoulDamageAccountant:
                 self.total_characters_in_crypts[hour] = self.total_characters_in_crypts[hour-1]
 
 
-    def simulateCryptsArrivals(self, hour, hours_to_reset=24):
+    def simulateCryptsArrivals(self, hour, hours_to_reset=48):
 
         if (hour % hours_to_reset) <= HOURS_TO_REACH_CRYPTS_ENDTILES:
             # 24 hours in, reset the round; assuming each Crypts round is 24hrs

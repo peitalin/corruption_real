@@ -83,7 +83,9 @@ class CorruptionAccountant:
 
             if hour > 0:
                 prev_value = self.y_corruption[k][-1]
-                if prev_value <= 1_000_000:
+                if prev_value + rate > 1_000_000:
+                    self.y_corruption[k].append(1_000_000)
+                else:
                     self.y_corruption[k].append(prev_value + rate)
             else:
                 self.y_corruption[k].append(initial_corruption_balances[k])
@@ -108,6 +110,7 @@ class CorruptionAccountant:
         else:
             PR_REMOVE_CORRUPTION = 0.1
 
+        print('hour1: ', hour)
         current_corruption = self.y_corruption[k][hour]
         # do this x times, depending on how high corruption is
         ntimes = getNumTimesTryRemoveCorruption(current_corruption)
