@@ -67,36 +67,36 @@ def simulation_fn(i):
         ax1.grid(color='grey', linestyle='-', linewidth=0.5, alpha=0.5)
 
 
-    ## Plot 2 - Prisms Burnt, and Dark Prisms created
-    # ax2.plot(
-    #     hours,
-    #     corrAccountant.y_prisms.values(),
-    #     label="Prisms Burnt",
-    #     color='royalblue',
-    #     linestyle="--",
-    # )
-    # ax2.plot(
-    #     hours,
-    #     corrAccountant.y_dark_prisms.values(),
-    #     label="Dark Prisms",
-    #     color='crimson',
-    #     linestyle="--",
-    # )
-    # ax2.set(xlabel='', ylabel='#Prisms and #Dark_Prisms')
+    # Plot 2 - Prisms Burnt, and Dark Prisms created
+    ax2.plot(
+        hours,
+        corrAccountant.y_prisms.values(),
+        label="Prisms Burnt",
+        color='royalblue',
+        linestyle="--",
+    )
+    ax2.plot(
+        hours,
+        corrAccountant.y_dark_prisms.values(),
+        label="Dark Prisms",
+        color='crimson',
+        linestyle="--",
+    )
+    ax2.set(xlabel='', ylabel='#Prisms and #Dark_Prisms')
 
-    ### Harvester Damage
-    for k in corrAccountant.y_structures:
-        if isHarvester(k):
-            ax2.plot(
-                hours,
-                corrAccountant.y_harvester_dmg[k],
-                label="{} Damage".format(k),
-                color='crimson',
-                linestyle=harvester_linestyles[k],
-                alpha=0.4,
-            )
-            ax2.set(xlabel='', ylabel='Harvester Damage')
-            ax2.grid(color='grey', linestyle='-', linewidth=0.5, alpha=0.5)
+    # ### Harvester Damage
+    # for k in corrAccountant.y_structures:
+    #     if isHarvester(k):
+    #         ax2.plot(
+    #             hours,
+    #             corrAccountant.y_harvester_dmg[k],
+    #             label="{} Damage".format(k),
+    #             color='crimson',
+    #             linestyle=harvester_linestyles[k],
+    #             alpha=0.4,
+    #         )
+    #         ax2.set(xlabel='', ylabel='Harvester Damage')
+    #         ax2.grid(color='grey', linestyle='-', linewidth=0.5, alpha=0.5)
 
     #### Plot 3 - Amount of Corruption in forbidden crafts forgeable pool
     ax3.plot(
@@ -117,8 +117,8 @@ def simulation_fn(i):
     ax3.grid(color='grey', linestyle='-', linewidth=0.5, alpha=0.5)
 
     ax1.set_title('Corruption in Harvesters and BW', size=10, color=gold)
-    # ax2.set_title('Prisms Burnt and Malevolent Prisms Created', size=10, color=gold)
-    ax2.set_title('Harvester Damage Accumulated over Time', size=10, color=gold)
+    ax2.set_title('Prisms Burnt and Malevolent Prisms Created', size=10, color=gold)
+    # ax2.set_title('Harvester Damage Accumulated over Time', size=10, color=gold)
     ax3.set_title('Total Corruption Circulating', size=10, color=gold)
 
     ax1.legend(bbox_to_anchor=(1.3, 1.1), loc="upper right")

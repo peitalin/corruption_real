@@ -70,13 +70,13 @@ percent_corr_forged_by_legion = {
 
 # months
 harvester_age = {
-    "h1": 11,
-    "h2": 10,
-    "h3": 10,
-    "h4": 6,
-    "h5": 6,
-    "h6": 2,
-    "h7": 1,
+    "h1": 12,
+    "h2": 12,
+    "h3": 12,
+    "h4": 7,
+    "h5": 7,
+    "h6": 3,
+    "h7": 3,
 }
 
 
@@ -86,8 +86,8 @@ default_initial_balances = {
     'y_dark_prisms_cumulative': 0,
     'y_prisms': 0,
     'y_prisms_cumulative': 0,
-    'y_forgeable_corruption': 800_000,
-    'y_total_circulating_corruption': 400_000,
+    'y_forgeable_corruption': 1_500_000,
+    'y_total_circulating_corruption': 500_000,
 }
 
 initial_corruption_balances = {
@@ -142,3 +142,14 @@ corruption_diversion_points = {
     'aux_uncommon': 30,
     'aux_common': 20,
 }
+
+
+
+# d = [3,4,5,6,7,8,9,10,11,12]
+# m9 = [age*age/9 for age in d]
+# m12 = [age*age/12 for age in d]
+
+# plt.plot(d, m9, label="/9")
+# plt.plot(d, m12, label='/12')
+# plt.legend()
+# plt.show()

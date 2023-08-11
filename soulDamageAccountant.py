@@ -1,24 +1,28 @@
 
-from soulDamageDiversion import divertSoulDamageHarvesters
 from parameters import harvester_age, harvester_list, getCorruptionLevel
 from parameters import corruption_diversion_points
 import numpy as np
+from functools import reduce
 
+
+DEATH_THRESHOLD = 1_000_000
+TARGET_NUM_HARVESTERS = 4
 
 HOURS_TO_REACH_CRYPTS_ENDTILES = 12
+SOUL_DAMAGE_BASE_RATE = 9999
 
 
-def drawTileArrivals():
+def drawTileArrivals(hDead):
     # simulate characters arriving on harvester tiles/destinations every period (1 hours)
     bounds = [20, 40]
     return {
-        'h1': np.random.randint(bounds[0], bounds[1]),
-        'h2': np.random.randint(bounds[0], bounds[1]),
-        'h3': np.random.randint(bounds[0], bounds[1]),
-        'h4': np.random.randint(bounds[0], bounds[1]),
-        'h5': np.random.randint(bounds[0], bounds[1]),
-        'h6': np.random.randint(bounds[0], bounds[1]),
-        'h7': np.random.randint(bounds[0], bounds[1]),
+        'h1': 0 if hDead['h1'] else np.random.randint(bounds[0]*4, bounds[1]*4),
+        'h2': 0 if hDead['h2'] else np.random.randint(bounds[0], bounds[1]),
+        'h3': 0 if hDead['h3'] else np.random.randint(bounds[0], bounds[1]),
+        'h4': 0 if hDead['h4'] else np.random.randint(bounds[0]*4, bounds[1]*4),
+        'h5': 0 if hDead['h5'] else np.random.randint(bounds[0], bounds[1]),
+        'h6': 0 if hDead['h6'] else np.random.randint(bounds[0], bounds[1]),
+        'h7': 0 if hDead['h7'] else np.random.randint(bounds[0], bounds[1]),
     }
 
 def drawCorrLevel():
@@ -34,14 +38,12 @@ def drawCorrLevel():
     }
 
 
-soul_damage_base_rate = 1000
 
 
 class SoulDamageAccountant:
     """ Soul Damage accounting history object """
 
     def __init__(self):
-        self.max_soul_damage = 1_000_000
         self.harvesters = harvester_list
         self.y_soul_damage = {
             'h1': { 0: 0 },
@@ -61,6 +63,34 @@ class SoulDamageAccountant:
             'h6': { 0: 0 },
             'h7': { 0: 0 },
         }
+        self.soul_damage_rates = {
+            'h1': { 0: 0 },
+            'h2': { 0: 0 },
+            'h3': { 0: 0 },
+            'h4': { 0: 0 },
+            'h5': { 0: 0 },
+            'h6': { 0: 0 },
+            'h7': { 0: 0 },
+        }
+        self.harvester_age = harvester_age
+        self.death_time = {
+            'h1': np.nan,
+            'h2': np.nan,
+            'h3': np.nan,
+            'h4': np.nan,
+            'h5': np.nan,
+            'h6': np.nan,
+            'h7': np.nan,
+        }
+        self.death = {
+            'h1': False,
+            'h2': False,
+            'h3': False,
+            'h4': False,
+            'h5': False,
+            'h6': False,
+            'h7': False,
+        }
         self.total_characters_in_crypts = { 0: 0 }
 
 
@@ -77,7 +107,16 @@ class SoulDamageAccountant:
                 else:
                     self.y_soul_damage[h][hour] = self.y_soul_damage[h][hour-1]
 
-        # Crypts num characters on the board/destinations
+        # Soul Damage Rates per hour
+        for h in self.harvesters:
+            if h not in self.soul_damage_rates.keys():
+                continue
+            if hour not in self.soul_damage_rates[h].keys():
+                if hour == 0:
+                    self.soul_damage_rates[h][hour] = 0
+                else:
+                    self.soul_damage_rates[h][hour] = self.soul_damage_rates[h][hour-1]
+
         for h in self.harvesters:
             if h not in self.characters_on_end_tiles.keys():
                 continue
@@ -97,17 +136,17 @@ class SoulDamageAccountant:
     def simulateCryptsArrivals(self, hour, hours_to_reset=48):
 
         if (hour % hours_to_reset) <= HOURS_TO_REACH_CRYPTS_ENDTILES:
-            # 24 hours in, reset the round; assuming each Crypts round is 24hrs
+            # assume it takes this much time to create the end of Crypts
             # assume first X hours, no legion makes it to destination under X hrs
             for h in self.harvesters:
                 self.characters_on_end_tiles[h][hour] = 0
+
+            self.total_characters_in_crypts[hour] = 0
         else:
             # otherwise, draw random arrivals to end tiles and increment
-            arrivals = drawTileArrivals()
-            total_characters_in_crypts = 0
+            arrivals = drawTileArrivals(self.death)
             for h in self.harvesters:
-                total_characters_in_crypts += arrivals[h]
-                self.total_characters_in_crypts[hour] = total_characters_in_crypts
+                self.total_characters_in_crypts[hour] += arrivals[h]
                 prev_count = self.characters_on_end_tiles[h][hour-1]
                 self.characters_on_end_tiles[h][hour] = prev_count + arrivals[h]
 
@@ -117,17 +156,35 @@ class SoulDamageAccountant:
         ### TODO: incorporate diversion points
         total_corr_div_pts = self.total_characters_in_crypts[hour]
         corr_div_pts = self.characters_on_end_tiles[harvester][hour]
+        # number of months since birth
+        age = harvester_age[harvester]
+        # current corruption levels for each harvester
+        # corr_level = getCorruptionLevel(harvester_corr_balances[harvester][-1])
 
-        if total_corr_div_pts == 0:
-            ## no one playing Crypts
-            return 0
+        num_active_harvesters = 0
+        for x in self.death.values():
+            if x == False:
+                num_active_harvesters += 1
+
+        if self.death[harvester]:
+            soul_damage_share = 0
         else:
-            age = harvester_age[harvester] # number of months since birth
-            c = getCorruptionLevel(harvester_corr_balances[harvester][-1]) # current corruption levels for each harvester
+            soul_damage_share = (corr_div_pts) / (1 + total_corr_div_pts)
 
-            m = age * 2 * (1 + c)
-            # m = age * 2
-            return soul_damage_base_rate * (corr_div_pts / total_corr_div_pts) * m
+        # if age < 3:
+        #     m = 0
+        # else:
+        #     # m = (age + corr_level)
+        #     m = age * age / 9
+
+        n = num_active_harvesters / TARGET_NUM_HARVESTERS
+        # soul_damage_share range: 1 ~ 4
+        # age term range: 1 ~ 3+
+        # corr term range: 1 ~ 3
+
+        soul_damage = SOUL_DAMAGE_BASE_RATE * soul_damage_share * n
+        self.soul_damage_rates[harvester][hour] = soul_damage
+        return soul_damage
 
 
     def emitSoulDamage(self, hour, harvester_corr_balances):
@@ -138,43 +195,16 @@ class SoulDamageAccountant:
                 self.y_soul_damage[h][hour] = 0
             else:
                 prev_value = self.y_soul_damage[h][hour-1]
-                self.y_soul_damage[h][hour] = prev_value + rate
+                soul_dmg_balance = prev_value + rate
+                if soul_dmg_balance >= DEATH_THRESHOLD:
+                    self.death[h] = True
+                    self.death_time[h] = hour
+                    self.y_soul_damage[h][hour] = 0
+                else:
+                    if self.death[h] == True:
+                        self.y_soul_damage[h][hour] = 0
+                    else:
+                        self.y_soul_damage[h][hour] = prev_value + rate
 
 
 
-
-s = SoulDamageAccountant()
-corr = drawCorrLevel()
-
-s.addAccountingEntriesForHour(1)
-s.simulateCryptsArrivals(1)
-s.emitSoulDamage(1, corr)
-s.characters_on_end_tiles
-
-s.addAccountingEntriesForHour(2)
-s.simulateCryptsArrivals(2)
-s.emitSoulDamage(2, corr)
-s.characters_on_end_tiles
-
-s.addAccountingEntriesForHour(3)
-s.simulateCryptsArrivals(3)
-s.emitSoulDamage(3, corr)
-s.characters_on_end_tiles
-
-s.addAccountingEntriesForHour(4)
-s.simulateCryptsArrivals(4)
-s.emitSoulDamage(4, corr)
-s.characters_on_end_tiles
-
-s.addAccountingEntriesForHour(5)
-s.simulateCryptsArrivals(5)
-s.emitSoulDamage(5, corr)
-s.characters_on_end_tiles
-
-# s.simulateCryptsArrivals(24)
-# s.addAccountingEntriesForHour(24)
-# s.emitSoulDamage(24)
-# s.characters_on_end_tiles
-
-s.total_characters_in_crypts
-s.y_soul_damage
